@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deriverse Trading Analytics Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .nav-tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-color: transparent;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .card-title {
+            font-size: 14px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .card-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .card-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .card-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin-top: 20px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #a0a0a0;
+            text-transform: uppercase;
+        }
+        
+        .holdings-table, .trades-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .holdings-table th, .trades-table th {
+            text-align: left;
+            padding: 12px;
+            color: #a0a0a0;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .holdings-table td, .trades-table td {
+            padding: 16px 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .token-cell, .trade-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .token-icon, .trade-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .trade-icon.long {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .trade-icon.short {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .token-info h4, .trade-info h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .token-info span, .trade-info span {
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+        
+        .price-change, .pnl-change {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .price-change.up, .pnl-change.positive {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+        }
+        
+        .price-change.down, .pnl-change.negative {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .allocation-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .allocation-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .bias-bar {
+            display: flex;
+            height: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .bias-long {
+            background: #22c55e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .bias-short {
+            background: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-input {
+            padding: 10px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .filter-input::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">📊</div>
+                <h1>Deriverse Trading Analytics</h1>
+            </div>
+            <div class="nav-tabs">
+                <button class="nav-tab active" onclick="switchTab('portfolio')">Portfolio</button>
+                <button class="nav-tab" onclick="switchTab('journal')">Trade Journal</button>
+                <button class="nav-tab" onclick="switchTab('analytics')">Analytics</button>
+            </div>
+        </header>
+        
+        <!-- Portfolio Tab -->
+        <div id="portfolio-tab" class="tab-content active">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Total Portfolio Value</span>
+                    </div>
+                    <div class="card-value" id="totalValue">$0.00</div>
+                    <div class="card-change positive" id="totalChange">
+                        <span>+0.00%</span>
+                        <span>+$0.00</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="portfolioChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Asset Allocation</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="allocationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <span class="card-title">Your Holdings</span>
+                        <div class="actions">
+                            <button class="btn btn-primary">🔄 Refresh</button>
+                            <button class="btn btn-secondary">📥 Export</button>
+                        </div>
+                    </div>
+                    <table class="holdings-table">
+                        <thead>
+                            <tr>
+                                <th>Asset</th>
+                                <th>Balance</th>
+                                <th>Price</th>
+                                <th>Value</th>
+                                <th>24h Change</th>
+                                <th>Allocation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holdingsBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Trade Journal Tab -->
+        <div id="journal-tab" class="tab-content">
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Performance Summary</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="winRate">0%</div>
+                            <div class="stat-label">Win Rate</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalTrades">0</div>
+                            <div class="stat-label">Total Trades</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="profitFactor">0.00</div>
+                            <div class="stat-label">Profit Factor</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgWin">$0</div>
+                            <div class="stat-label">Avg Win</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgLoss">$0</div>
+                            <div class="stat-label">Avg Loss</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="maxDrawdown">0%</div>
+                            <div class="stat-label">Max Drawdown</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Long/Short Bias</span>
+                    </div>
+                    <div class="bias-bar" id="biasBar">
+                        <div class="bias-long" id="biasLong" style="width: 50%">LONG 50%</div>
+                        <div class="bias-short" id="biasShort" style="width: 50%">SHORT 50%</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+                        <div>
+                            <div style="font-size: 12px; color: #a0a0a0;">Long P&L</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #22c55e;" id="longPnL">+$0</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #a0a0a0;">Short P&L</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #ef4444;" id="shortPnL">$0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Equity Curve & Drawdown</span>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <span class="card-title">Fee Breakdown</span>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-value" id="totalFees">$0</div>
+                            <div class="stat-label">Total Fees</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="avgFee">$0</div>
+                            <div class="stat-label">Avg Fee/Trade</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="feePercent">0%</div>
+                            <div class="stat-label">Fees % of P&L</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <span class="card-title">Trade Journal</span>
+                        <div class="actions">
+                            <button class="btn btn-primary">➕ Add Trade</button>
+                            <button class="btn btn-secondary">📥 Export</button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-bar">
+                        <input type="text" class="filter-input" placeholder="Symbol (e.g. SOL)" id="filterSymbol">
+                        <input type="date" class="filter-input" id="filterStartDate">
+                        <input type="date" class="filter-input" id="filterEndDate">
+                        <select class="filter-input" id="filterSide">
+                            <option value="">All Sides</option>
+                            <option value="long">Long</option>
+                            <option value="short">Short</option>
+                        </select>
+                        <button class="btn btn-secondary" onclick="applyFilters()">🔍 Filter</button>
+                    </div>
+                    
+                    <table class="trades-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Symbol</th>
+                                <th>Side</th>
+                                <th>Entry</th>
+                                <th>Exit</th>
+                                <th>Size</th>
+                                <th>P&L</th>
+                                <th>Fees</th>
+                                <th>Tags</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Analytics Tab -->
+        <div id="analytics-tab" class="tab-content">
+            <div class="grid">
+                <div class="card" style="grid-column: 1 / -1;">
+                    <div class="card-header">
+                        <span class="card-title">Performance Analytics</span>
+                    </div>
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Sample data
+        let portfolioData = {
+            totalValue: 465.06,
+            pnl24h: { usd: 12.45, percent: 2.75 },
+            tokens: [
+                { symbol: 'SOL', name: 'Solana', logo: '◎', balance: 1.9748, price: 235.50, value: 465.06, change24h: 2.25, allocation: 100 },
+                { symbol: 'USDC', name: 'USD Coin', logo: '💵', balance: 0, price: 1.00, value: 0, change24h: 0, allocation: 0 },
+            ]
+        };
+        
+        let tradeData = {
+            winRate: 68.5,
+            totalTrades: 47,
+            profitFactor: 2.34,
+            avgWin: 145.50,
+            avgLoss: -62.30,
+            maxDrawdown: 12.4,
+            longCount: 32,
+            shortCount: 15,
+            longPnL: 2340.50,
+            shortPnL: -450.20,
+            totalFees: 234.50,
+            avgFee: 4.99,
+            feePercent: 8.2,
+            trades: [
+                { date: '2026-01-29', symbol: 'SOL-PERP', side: 'long', entry: 235.50, exit: 240.00, size: 10, pnl: 45.00, fees: 2.35, tags: ['breakout'] },
+                { date: '2026-01-28', symbol: 'BTC-PERP', side: 'short', entry: 42500, exit: 42100, size: 0.5, pnl: 200.00, fees: 5.20, tags: ['momentum'] },
+                { date: '2026-01-27', symbol: 'ETH-PERP', side: 'long', entry: 2580, exit: 2560, size: 5, pnl: -100.00, fees: 3.10, tags: ['support'] },
+            ]
+        };
+        
+        let portfolioChart, allocationChart, equityChart, analyticsChart;
+        
+        function initCharts() {
+            // Portfolio chart
+            const ctx1 = document.getElementById('portfolioChart').getContext('2d');
+            portfolioChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+                    datasets: [{
+                        label: 'Portfolio Value',
+                        data: [450, 455, 448, 462, 458, 465],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { display: false },
+                        y: { grid: { color: 'rgba(255,255,255,0.1)' }, ticks: { color: '#a0a0a0' } }
+                    }
+                }
+            });
+            
+            // Allocation chart
+            const ctx2 = document.getElementById('allocationChart').getContext('2d');
+            allocationChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: portfolioData.tokens.filter(t => t.value > 0).map(t => t.symbol),
+                    datasets: [{
+                        data: portfolioData.tokens.filter(t => t.value > 0).map(t => t.value),
+                        backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#fff' } } }
+                }
+            });
+            
+            // Equity curve chart
+            const ctx3 = document.getElementById('equityChart').getContext('2d');
+            equityChart = new Chart(ctx3, {
+                type: 'line',
+                data: {
+                    labels: ['Jan 1', 'Jan 5', 'Jan 10', 'Jan 15', 'Jan 20', 'Jan 25', 'Jan 29'],
+                    datasets: [{
+                        label: 'Equity',
+                        data: [1000, 1200, 1150, 1400, 1380, 1600, 1890],
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Drawdown %',
+                        data: [0, 0, 4.2, 0, 1.4, 0, 0],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#fff' } } },
+                    scales: {
+                        x: { ticks: { color: '#a0a0a0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { 
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            ticks: { color: '#22c55e' },
+                            grid: { color: 'rgba(255,255,255,0.1)' }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            ticks: { color: '#ef4444', callback: v => v + '%' },
+                            grid: { drawOnChartArea: false }
+                        }
+                    }
+                }
+            });
+            
+            // Analytics chart
+            const ctx4 = document.getElementById('analyticsChart').getContext('2d');
+            analyticsChart = new Chart(ctx4, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Winning Trades',
+                        data: [3, 5, 2, 4, 6, 1, 2],
+                        backgroundColor: '#22c55e'
+                    }, {
+                        label: 'Losing Trades',
+                        data: [2, 1, 3, 2, 1, 1, 0],
+                        backgroundColor: '#ef4444'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { labels: { color: '#fff' } } },
+                    scales: {
+                        x: { ticks: { color: '#a0a0a0' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#a0a0a0' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
+        
+        function updatePortfolio() {
+            document.getElementById('totalValue').textContent = '$' + portfolioData.totalValue.toLocaleString('en-US', {minimumFractionDigits: 2});
+            
+            const tbody = document.getElementById('holdingsBody');
+            tbody.innerHTML = portfolioData.tokens.map(token => `
+                <tr>
+                    <td>
+                        <div class="token-cell">
+                            <div class="token-icon">${token.logo}</div>
+                            <div class="token-info">
+                                <h4>${token.symbol}</h4>
+                                <span>${token.name}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${token.balance.toFixed(4)}</td>
+                    <td>$${token.price.toFixed(2)}</td>
+                    <td>$${token.value.toFixed(2)}</td>
+                    <td>
+                        <span class="price-change ${token.change24h >= 0 ? 'up' : 'down'}">
+                            ${token.change24h >= 0 ? '↑' : '↓'} ${Math.abs(token.change24h).toFixed(2)}%
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div class="allocation-bar" style="width: 60px;">
+                                <div class="allocation-fill" style="width: ${token.allocation}%"></div>
+                            </div>
+                            <span>${token.allocation.toFixed(1)}%</span>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        function updateTradeJournal() {
+            // Update stats
+            document.getElementById('winRate').textContent = tradeData.winRate.toFixed(1) + '%';
+            document.getElementById('totalTrades').textContent = tradeData.totalTrades;
+            document.getElementById('profitFactor').textContent = tradeData.profitFactor.toFixed(2);
+            document.getElementById('avgWin').textContent = '$' + tradeData.avgWin.toFixed(0);
+            document.getElementById('avgLoss').textContent = '$' + tradeData.avgLoss.toFixed(0);
+            document.getElementById('maxDrawdown').textContent = tradeData.maxDrawdown.toFixed(1) + '%';
+            
+            // Update bias
+            const total = tradeData.longCount + tradeData.shortCount;
+            const longPercent = total > 0 ? (tradeData.longCount / total) * 100 : 50;
+            const shortPercent = 100 - longPercent;
+            document.getElementById('biasLong').style.width = longPercent + '%';
+            document.getElementById('biasLong').textContent = `LONG ${longPercent.toFixed(0)}%`;
+            document.getElementById('biasShort').style.width = shortPercent + '%';
+            document.getElementById('biasShort').textContent = `SHORT ${shortPercent.toFixed(0)}%`;
+            document.getElementById('longPnL').textContent = (tradeData.longPnL >= 0 ? '+' : '') + '$' + tradeData.longPnL.toFixed(2);
+            document.getElementById('shortPnL').textContent = (tradeData.shortPnL >= 0 ? '+' : '') + '$' + tradeData.shortPnL.toFixed(2);
+            
+            // Update fees
+            document.getElementById('totalFees').textContent = '$' + tradeData.totalFees.toFixed(2);
+            document.getElementById('avgFee').textContent = '$' + tradeData.avgFee.toFixed(2);
+            document.getElementById('feePercent').textContent = tradeData.feePercent.toFixed(1) + '%';
+            
+            // Update trades table
+            const tbody = document.getElementById('tradesBody');
+            tbody.innerHTML = tradeData.trades.map(trade => `
+                <tr>
+                    <td>${trade.date}</td>
+                    <td>${trade.symbol}</td>
+                    <td>
+                        <span class="pnl-change ${trade.side === 'long' ? 'positive' : 'negative'}">
+                            ${trade.side.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>$${trade.entry.toFixed(2)}</td>
+                    <td>$${trade.exit.toFixed(2)}</td>
+                    <td>${trade.size}</td>
+                    <td>
+                        <span class="pnl-change ${trade.pnl >= 0 ? 'positive' : 'negative'}">
+                            ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}
+                        </span>
+                    </td>
+                    <td>$${trade.fees.toFixed(2)}</td>
+                    <td>${trade.tags.map(t => `<span style="background: rgba(102,126,234,0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px;">${t}</span>`).join(' ')}</td>
+                </tr>
+            `).join('');
+        }
+        
+        function switchTab(tab) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(tab + '-tab').classList.add('active');
+        }
+        
+        function applyFilters() {
+            const symbol = document.getElementById('filterSymbol').value;
+            const side = document.getElementById('filterSide').value;
+            
+            // Filter trades
+            let filtered = tradeData.trades;
+            if (symbol) {
+                filtered = filtered.filter(t => t.symbol.toLowerCase().includes(symbol.toLowerCase()));
+            }
+            if (side) {
+                filtered = filtered.filter(t => t.side === side);
+            }
+            
+            // Update table with filtered data
+            const tbody = document.getElementById('tradesBody');
+            tbody.innerHTML = filtered.map(trade => `
+                <tr>
+                    <td>${trade.date}</td>
+                    <td>${trade.symbol}</td>
+                    <td>
+                        <span class="pnl-change ${trade.side === 'long' ? 'positive' : 'negative'}">
+                            ${trade.side.toUpperCase()}
+                        </span>
+                    </td>
+                    <td>$${trade.entry.toFixed(2)}</td>
+                    <td>$${trade.exit.toFixed(2)}</td>
+                    <td>${trade.size}</td>
+                    <td>
+                        <span class="pnl-change ${trade.pnl >= 0 ? 'positive' : 'negative'}">
+                            ${trade.pnl >= 0 ? '+' : ''}$${trade.pnl.toFixed(2)}
+                        </span>
+                    </td>
+                    <td>$${trade.fees.toFixed(2)}</td>
+                    <td>${trade.tags.map(t => `<span style="background: rgba(102,126,234,0.3); padding: 2px 8px; border-radius: 4px; font-size: 11px;">${t}</span>`).join(' ')}</td>
+                </tr>
+            `).join('');
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            updatePortfolio();
+            updateTradeJournal();
+        });
+    </script>
+</body>
+</html>
