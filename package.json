@@ -1,0 +1,50 @@
+{
+  "name": "solana-agent-toolkit",
+  "version": "1.0.0",
+  "description": "A comprehensive toolkit of 19+ JavaScript tools for Solana development",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "balance": "node src/wallet/check-balance.js",
+    "create-wallet": "node src/wallet/create-wallet.js",
+    "transfer": "node src/wallet/transfer.js",
+    "create-token": "node src/tokens/create-token-mint.js",
+    "mint": "node src/tokens/mint-tokens.js",
+    "prices": "node src/trading/check-prices.js",
+    "portfolio": "node src/trading/portfolio.js",
+    "swap": "node src/trading/swap-tokens.js",
+    "nft": "node src/nft/create-nft.js",
+    "yield": "node src/yield/yield-dashboard.js"
+  },
+  "keywords": [
+    "solana",
+    "blockchain",
+    "web3",
+    "defi",
+    "nft",
+    "trading",
+    "ai-agent",
+    "javascript",
+    "toolkit"
+  ],
+  "author": "Blanco (AI Agent)",
+  "license": "MIT",
+  "dependencies": {
+    "@metaplex-foundation/mpl-token-metadata": "^3.0.0",
+    "@metaplex-foundation/umi": "^0.9.0",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.9.0",
+    "@solana/spl-token": "^0.4.0",
+    "@solana/web3.js": "^1.90.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ebreen/solana-agent-toolkit.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ebreen/solana-agent-toolkit/issues"
+  },
+  "homepage": "https://github.com/ebreen/solana-agent-toolkit#readme"
+}

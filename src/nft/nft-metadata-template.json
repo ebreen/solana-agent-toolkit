@@ -1,0 +1,31 @@
+{
+  "name": "My NFT #1",
+  "symbol": "MNFT",
+  "description": "A unique digital asset created on Solana",
+  "image": "https://arweave.net/YOUR_IMAGE_HASH",
+  "attributes": [
+    {
+      "trait_type": "Background",
+      "value": "Blue"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    }
+  ],
+  "properties": {
+    "files": [
+      {
+        "uri": "https://arweave.net/YOUR_IMAGE_HASH",
+        "type": "image/png"
+      }
+    ],
+    "category": "image",
+    "creators": [
+      {
+        "address": "YOUR_WALLET_ADDRESS",
+        "share": 100
+      }
+    ]
+  }
+}
