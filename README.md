@@ -1,6 +1,6 @@
 # Solana Agent Toolkit
 
-> A comprehensive, open-source toolkit of 19+ JavaScript tools for Solana development. Built for AI agents and developers.
+> A comprehensive, open-source toolkit of 20+ JavaScript tools for Solana development. Built for AI agents and developers.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Solana](https://img.shields.io/badge/Solana-Devnet-blue)](https://solana.com)
@@ -47,6 +47,8 @@ node src/wallet/check-balance.js
 | `portfolio.js` | Multi-token portfolio tracking |
 | `arbitrage-scanner.js` | Detect price discrepancies |
 | `swap-tokens.js` | Execute token swaps via Jupiter |
+| `dashboard.js` | **Deriverse-style trading dashboard** with P&L tracking |
+| `dashboard.html` | Web dashboard with Chart.js visualizations |
 
 ### Automation
 | Tool | Description |
@@ -99,6 +101,15 @@ node src/nft/create-nft.js "My NFT" "MNFT" "https://arweave.net/metadata.json" 5
 ```bash
 node src/yield/yield-dashboard.js
 node src/yield/yield-dashboard.js calc 10000
+```
+
+### Launch Trading Dashboard
+```bash
+# CLI version
+node src/trading/dashboard.js
+
+# Web version
+open dashboard.html
 ```
 
 ## 🏗️ Architecture
